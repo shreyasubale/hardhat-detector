@@ -18,6 +18,9 @@ from keras.optimizers import SGD
 # define constants and parameters
 img_width, img_height = 300, 300
 
+#video capture
+video_capture = cv2.VideoCapture(0)
+
 
 # create argument parser for custom image input
 parser = argparse.ArgumentParser(description = 'This is a Hardhat Detection program')
@@ -35,22 +38,47 @@ model.compile(loss = "categorical_crossentropy",
 
 
 # make prediction if image specified exists
-if(os.path.isfile(fileName)):
-    img = cv2.imread(fileName)
-    img = cv2.resize(img, (img_width, img_height))
-    img = img.astype("float") /  255.0
-    img = np.reshape(img, [1, img_width, img_height, 3])
 
+while True:
+    ret, img = video_capture.read();
+
+    faces = faceCascade.detectMultiScale(
+        gray,
+        scaleFactor=1.1,
+        minNeighbors=5,
+        minSize=(30, 30),
+        flags=cv2.cv.CV_HAAR_SCALE_IMAGE
+    )
+
+    img = cv2.resize(img, (img_width, img_height))
+    img = img.astype("float") / 255.0
+    img = np.reshape(img, [1, img_width, img_height, 3])
     result = model.predict(img)
     pred = np.argmax(result, axis=1)
-
-    if(pred[0] == 0):
+    if (pred[0] == 0):
         print("No hardhat is being worn.")
     else:
         print("A hardhat is being worn.")
+
+    if cv2.waitKey(1) & 0xFF == ord('q'):
+        break
+
+# if(os.path.isfile(fileName)):
+#     img = cv2.imread(fileName)
+#     img = cv2.resize(img, (img_width, img_height))
+#     img = img.astype("float") /  255.0
+#     img = np.reshape(img, [1, img_width, img_height, 3])
+#
+#     result = model.predict(img)
+#     pred = np.argmax(result, axis=1)
+#
+#     if(pred[0] == 0):
+#         print("No hardhat is being worn.")
+#     else:
+#         print("A hardhat is being worn.")
     
 
 # return false statement if image specified does not exist
-else:
-    print("The directory " + fileName + " could not be located.")
+# else:
+#     print("The directory " + fileName + " could not be located.")
     
